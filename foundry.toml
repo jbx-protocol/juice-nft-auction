@@ -1,0 +1,12 @@
+[profile.default]
+libs = ['lib']
+out = 'out'
+remappings = [
+    '@jbx-protocol=node_modules/@jbx-protocol/',
+    '@openzeppelin=node_modules/@openzeppelin/',
+    'ds-test/=lib/ds-test/src/',
+    '@rari-capital=node_modules/@rari-capital/'
+]
+src = 'src'
+test = 'forge-test'
+script = 'scripts'

@@ -1,0 +1,25 @@
+{
+    "name": "@jbx-protocol/juice-nft-auction",
+    "bugs": {
+      "url": "https://github.com/jbx-protocol/juice-nft-auction/issues"
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/jbx-protocol/juice-nft-auction"
+    },
+    "license": "MIT",
+    "dependencies": {
+      "@jbx-protocol/contracts-v2": "^8.0.2",
+      "@openzeppelin/contracts": "^4.7.3",
+      "@rari-capital/solmate": "^6.4.0"
+    },
+    "devDependencies": {
+      "prettier": "^2.4.0",
+      "prettier-plugin-solidity": "^1.0.0-beta.19",
+      "solhint": "^3.3.6",
+      "solhint-plugin-prettier": "^0.0.5"
+    },
+    "scripts": {
+      "pretty": "prettier --write \"./**/*.{js,jsx,json,sol}\""
+    }
+  }
