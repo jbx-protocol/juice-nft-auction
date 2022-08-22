@@ -131,6 +131,18 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
     }
 
     /**
+    @dev Checks if max. supply has been reached.
+    @return bool Flag indicating if max. supply has been reached.
+    */
+    function isMaxSupplyReached() public view returns (bool) {
+        if (maxSupply > 0 && nextTokenId == maxSupply) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
     @dev Updates the minter
     @param newMinter New Minter address
     */
@@ -151,7 +163,7 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
     }
 
     function mint(address _recipient) external onlyMinter whenMintingIsActive {
-        if (maxSupply > 0 && nextTokenId == maxSupply) {
+        if (isMaxSupplyReached()) {
             revert MAX_SUPPLY_REACHED();
         }
 

@@ -8,6 +8,8 @@ interface INFT{
     */
     function isMintingActive() external view returns (bool);
 
+    function isMaxSupplyReached() external view returns (bool);
+
     function mint(address _recipient) external;
 
     function nextTokenId() external view returns(uint256);

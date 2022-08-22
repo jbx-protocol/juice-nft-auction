@@ -10,12 +10,12 @@ import "./interfaces/IWETH9.sol";
 import "./interfaces/INFT.sol";
 
 // Custom Errors
+error ALREADY_HIGHEST_BIDDER();
 error AUCTION_NOT_OVER();
 error AUCTION_OVER();
 error AUCTION_ALREADY_FINALIZED();
 error BID_TOO_LOW();
-error ALREADY_HIGHEST_BIDDER();
-error INVALID_DURATION();
+error MAX_SUPPLY_REACHED();
 error TOKEN_TRANSFER_FAILURE();
 
 contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
@@ -56,15 +56,15 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
             address(this)
         )
     {
-        if (_duration == 0) {
-            revert INVALID_DURATION();
-        }
         nft = _nft;
         auctionDuration = _duration;
         projectId = _projectId;
         weth = _weth;
     }
 
+    /**
+    @dev Transfers eth/weth.
+    */
     function _transferFunds(address _bidder, uint256 _amount) internal {
         if (_amount > 0) {
             (bool sent, ) = _bidder.call{value: _amount, gas: 20000}("");
@@ -93,6 +93,9 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
     @dev Allows users to bid & send eth to the contract.
     */
     function bid() public payable nonReentrant {
+        if (nft.isMaxSupplyReached()) {
+            revert MAX_SUPPLY_REACHED();
+        }
         // the auctionEndingAt is only set during the first bid of every id to avoid total supply incremental dependency on the nft contract
         if (auctionEndingAt != 0 && block.timestamp >= auctionEndingAt) {
             revert AUCTION_OVER();
