@@ -48,14 +48,6 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
         _;
     }
 
-    /**
-     * @notice Require that the minter be mutable.
-     */
-    modifier whenMinterIsMutable() {
-        require(minterIsMutable, "Minter is immutable");
-        _;
-    }
-
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
@@ -63,7 +55,6 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
     uint256 public nextTokenId; // Next token id to be minted
     string public baseURI;
     bool public metadataFrozen;
-    bool public minterIsMutable = true;
     address public minter;
     uint256 public maxSupply; // Maximum issuance of NFTs. 0 means unlimited.
     bool mintingActive = true;
@@ -74,7 +65,6 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
      * @param _symbol Symbol of the NFT
      * @param _uri Base URI of the NFT, concatenated with Token ID to create tokenURI
      * @param _minter Address of the minter
-     * @param _minterIsMutable Flag that indicates if minter is mutable
      * @param _maxSupply Maximum supply of NFTs. 0 means unlimited
      */
     constructor(
@@ -82,13 +72,10 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
         string memory _symbol,
         string memory _uri,
         address _minter,
-        bool _minterIsMutable,
         uint256 _maxSupply
     ) ERC721(_name, _symbol) {
         _setBaseURI(_uri);
         _setMinter(_minter);
-        // TODO: Can't we just set the minter as the nft auction address with the set minter method instead of passing to the constructor, we'll also save gas with this
-        minterIsMutable = _minterIsMutable;
         maxSupply = _maxSupply;
     }
 
@@ -152,25 +139,17 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
     function _setMinter(address newMinter)
         internal
         onlyOwner
-        whenMinterIsMutable
     {
         minter = newMinter;
         emit MinterChanged(minter);
     }
 
     /**
-    @dev Updates the minter if it is mutable
+    @dev Updates the minter
     @param newMinter New Minter address
     */
     function setMinter(address newMinter) external onlyOwner {
         _setMinter(newMinter);
-    }
-
-    /**
-    @dev Make minter permanently immutable.
-    */
-    function setMinterImmutable() external onlyOwner whenMinterIsMutable {
-        minterIsMutable = false;
     }
 
     function mint(address _recipient) external onlyMinter whenMintingIsActive {
