@@ -127,7 +127,7 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
     /**
     @dev Allows anyone to mint the nft to the highest bidder/burn if there were no bids & restart the auction with a new end time.
     */
-    function finalize() public {
+    function finalize() public nonReentrant {
         if (block.timestamp <= auctionEndingAt) {
             revert AUCTION_NOT_OVER();
         }
@@ -160,6 +160,13 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
         } else {
             _transferFunds(lastBidder, lastAmount);
         }
+    }
+
+    /**
+    @dev Allows the admin to collect the funds earned on nft mints.
+    */
+    function collectFunds() external onlyOwner {
+        _transferFunds(msg.sender, address(this).balance);
     }
 
     function supportsInterface(bytes4 interfaceId)
