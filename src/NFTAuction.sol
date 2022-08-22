@@ -65,6 +65,19 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
         weth = _weth;
     }
 
+    function _transferFunds(address _bidder, uint256 _amount) internal {
+        if (_amount > 0) {
+            (bool sent, ) = _bidder.call{value: _amount, gas: 20000}("");
+            if (!sent) {
+                weth.deposit{value: _amount}();
+                bool success = weth.transfer(_bidder, _amount);
+                if (!success) {
+                    revert TOKEN_TRANSFER_FAILURE();
+                }
+            }
+        }
+    }
+
     /**
     @dev Returns time remaining in the auction.
     */
@@ -100,19 +113,10 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
         // if the bid is the first bid of the auction of a new id we set the auction end time and emit the event
         if (auctionEndingAt == 0) {
             auctionEndingAt = block.timestamp + auctionDuration;
-            emit NewAuction(auctionEndingAt, nft.nextTokenId() + 1);
+            emit NewAuction(auctionEndingAt, nft.nextTokenId());
         }
 
-        if (lastAmount > 0) {
-            (bool sent, ) = lastBidder.call{value: lastAmount, gas: 20000}("");
-            if (!sent) {
-                weth.deposit{value: lastAmount}();
-                bool success = weth.transfer(lastBidder, lastAmount);
-                if (!success) {
-                    revert TOKEN_TRANSFER_FAILURE();
-                }
-            }
-        }
+        _transferFunds(lastBidder, lastAmount);
 
         emit Bid(msg.sender, msg.value);
     }
@@ -137,19 +141,22 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
         highestBid = 0;
         highestBidder = address(0);
 
-        _pay(
-            projectId, //uint256 _projectId,
-            JBTokens.ETH, // address _token
-            lastAmount, //uint256 _amount,
-            18, //uint256 _decimals,
-            lastBidder, //address _beneficiary,
-            0, //uint256 _minReturnedTokens,
-            false, //bool _preferClaimedTokens,
-            "nft mint", //string calldata _memo, // TODO: Add your own memo here. Links to image å are displayed on the Juicebox project page as images.
-            "" //bytes calldata _metadata
-        );
-        // TODO: Handle minting active case
-        nft.mint(lastBidder);
+        if (nft.isMintingActive()) {
+            _pay(
+                projectId, //uint256 _projectId,
+                JBTokens.ETH, // address _token
+                lastAmount, //uint256 _amount,
+                18, //uint256 _decimals,
+                lastBidder, //address _beneficiary,
+                0, //uint256 _minReturnedTokens,
+                false, //bool _preferClaimedTokens,
+                "nft mint", //string calldata _memo, // TODO: Add your own memo here. Links to image å are displayed on the Juicebox project page as images.
+                "" //bytes calldata _metadata
+            );
+            nft.mint(lastBidder);
+        } else {
+            _transferFunds(lastBidder, lastAmount);
+        }
     }
 
     function supportsInterface(bytes4 interfaceId)

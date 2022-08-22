@@ -13,7 +13,6 @@ import "@rari-capital/solmate/src/utils/ReentrancyGuard.sol";
 /*//////////////////////////////////////////////////////////////
                                 ERRORS
 //////////////////////////////////////////////////////////////*/
-
 error METADATA_IS_IMMUTABLE();
 error MAX_SUPPLY_REACHED();
 
@@ -51,12 +50,11 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
-
-    uint256 public nextTokenId; // Next token id to be minted
+    uint256 public immutable maxSupply; // Maximum issuance of NFTs. 0 means unlimited.
+    uint256 public nextTokenId = 1; // Next token id to be minted id's are 1 based
     string public baseURI;
     bool public metadataFrozen;
     address public minter;
-    uint256 public maxSupply; // Maximum issuance of NFTs. 0 means unlimited.
     bool mintingActive = true;
 
     /**
@@ -156,10 +154,12 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
         if (maxSupply > 0 && nextTokenId == maxSupply) {
             revert MAX_SUPPLY_REACHED();
         }
+
+        _mint(_recipient, nextTokenId);
+
         unchecked {
             ++nextTokenId;
         }
-        _mint(_recipient, nextTokenId);
     }
 
     /*//////////////////////////////////////////////////////////////
