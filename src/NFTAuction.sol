@@ -100,7 +100,7 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
         // if the bid is the first bid of the auction of a new id we set the auction end time and emit the event
         if (auctionEndingAt == 0) {
             auctionEndingAt = block.timestamp + auctionDuration;
-            emit NewAuction(auctionEndingAt, nft.nextTokenId());
+            emit NewAuction(auctionEndingAt, nft.nextTokenId() + 1);
         }
 
         if (lastAmount > 0) {

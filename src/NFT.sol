@@ -74,9 +74,8 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
      * @param _symbol Symbol of the NFT
      * @param _uri Base URI of the NFT, concatenated with Token ID to create tokenURI
      * @param _minter Address of the minter
-     @
+     * @param _minterIsMutable Flag that indicates if minter is mutable
      * @param _maxSupply Maximum supply of NFTs. 0 means unlimited
-     * @param _oneBased If true, first tokenId is 1, otherwise 0
      */
     constructor(
         string memory _name,
@@ -84,18 +83,13 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
         string memory _uri,
         address _minter,
         bool _minterIsMutable,
-        uint256 _maxSupply,
-        bool _oneBased
+        uint256 _maxSupply
     ) ERC721(_name, _symbol) {
         _setBaseURI(_uri);
         _setMinter(_minter);
         // TODO: Can't we just set the minter as the nft auction address with the set minter method instead of passing to the constructor, we'll also save gas with this
         minterIsMutable = _minterIsMutable;
         maxSupply = _maxSupply;
-        // TODO: Why can't we just have a fixed pattern like having id's starting from 0 or 1 we can save gas by removing this check
-        if (_oneBased) {
-            nextTokenId = 1;
-        }
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -183,10 +177,10 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
         if (maxSupply > 0 && nextTokenId == maxSupply) {
             revert MAX_SUPPLY_REACHED();
         }
-        _mint(_recipient, nextTokenId);
         unchecked {
             ++nextTokenId;
         }
+        _mint(_recipient, nextTokenId);
     }
 
     /*//////////////////////////////////////////////////////////////
