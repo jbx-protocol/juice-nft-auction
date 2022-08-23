@@ -155,7 +155,7 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
                 lastBidder, //address _beneficiary,
                 0, //uint256 _minReturnedTokens,
                 false, //bool _preferClaimedTokens,
-                "nft mint", //string calldata _memo, // TODO: Add your own memo here. Links to image å are displayed on the Juicebox project page as images.
+                defaultMemo, //string calldata _memo, // TODO: Add your own memo here. Links to image å are displayed on the Juicebox project page as images.
                 "" //bytes calldata _metadata
             );
             nft.mint(lastBidder);
