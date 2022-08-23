@@ -102,6 +102,15 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
             revert BID_TOO_LOW();
         }
 
+        uint256 lastAmount = highestBid;
+        address lastBidder = highestBidder;
+
+        highestBid = msg.value;
+        highestBidder = msg.sender;
+         
+        if (auctionEndingAt != 0)
+          _transferFunds(lastBidder, lastAmount);
+
         // if the bid is the first bid of the auction of a new id we set the auction end time and emit the event
         if (auctionEndingAt == 0) {
             if (nft.isMaxSupplyReached()) {
@@ -110,14 +119,6 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
             auctionEndingAt = block.timestamp + auctionDuration;
             emit NewAuction(auctionEndingAt, nft.nextTokenId());
         }
-
-        uint256 lastAmount = highestBid;
-        address lastBidder = highestBidder;
-
-        highestBid = msg.value;
-        highestBidder = msg.sender;
-
-        _transferFunds(lastBidder, lastAmount);
 
         emit Bid(msg.sender, msg.value);
     }
