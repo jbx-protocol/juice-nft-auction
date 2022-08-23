@@ -43,6 +43,7 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
         INFT _nft,
         uint256 _duration,
         uint256 _projectId,
+        string memory _memo,
         IWETH9 _weth,
         IJBDirectory _jbDirectory
     )
@@ -50,7 +51,7 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
             _projectId,
             payable(msg.sender),
             false,
-            "NFT auction proceeds",
+            _memo,
             "",
             false,
             IJBDirectory(_jbDirectory),
