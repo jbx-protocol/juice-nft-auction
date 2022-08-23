@@ -93,9 +93,6 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
     @dev Allows users to bid & send eth to the contract.
     */
     function bid() public payable nonReentrant {
-        if (nft.isMaxSupplyReached()) {
-            revert MAX_SUPPLY_REACHED();
-        }
         // the auctionEndingAt is only set during the first bid of every id to avoid total supply incremental dependency on the nft contract
         if (auctionEndingAt != 0 && block.timestamp >= auctionEndingAt) {
             revert AUCTION_OVER();
@@ -107,17 +104,20 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
             revert ALREADY_HIGHEST_BIDDER();
         }
 
+        // if the bid is the first bid of the auction of a new id we set the auction end time and emit the event
+        if (auctionEndingAt == 0) {
+            if (nft.isMaxSupplyReached()) {
+                revert MAX_SUPPLY_REACHED();
+            }
+            auctionEndingAt = block.timestamp + auctionDuration;
+            emit NewAuction(auctionEndingAt, nft.nextTokenId());
+        }
+
         uint256 lastAmount = highestBid;
         address lastBidder = highestBidder;
 
         highestBid = msg.value;
         highestBidder = msg.sender;
-
-        // if the bid is the first bid of the auction of a new id we set the auction end time and emit the event
-        if (auctionEndingAt == 0) {
-            auctionEndingAt = block.timestamp + auctionDuration;
-            emit NewAuction(auctionEndingAt, nft.nextTokenId());
-        }
 
         _transferFunds(lastBidder, lastAmount);
 
