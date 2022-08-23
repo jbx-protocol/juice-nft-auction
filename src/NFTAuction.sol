@@ -29,6 +29,7 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
 
     event Bid(address indexed bidder, uint256 amount);
     event NewAuction(uint256 indexed auctionEndingAt, uint256 tokenId);
+    event AuctionCancelled();
 
     /**
         Creates a new instance of NFTAuctionMachine
@@ -158,6 +159,7 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
             );
             nft.mint(lastBidder);
         } else {
+            emit AuctionCancelled();
             _transferFunds(lastBidder, lastAmount);
         }
     }
