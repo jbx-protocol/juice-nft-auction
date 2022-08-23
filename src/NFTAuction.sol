@@ -10,7 +10,6 @@ import "./interfaces/IWETH9.sol";
 import "./interfaces/INFT.sol";
 
 // Custom Errors
-error ALREADY_HIGHEST_BIDDER();
 error AUCTION_NOT_OVER();
 error AUCTION_OVER();
 error AUCTION_ALREADY_FINALIZED();
@@ -101,9 +100,6 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
         }
         if (msg.value < (highestBid + 0.001 ether)) {
             revert BID_TOO_LOW();
-        }
-        if (msg.sender == highestBidder) {
-            revert ALREADY_HIGHEST_BIDDER();
         }
 
         // if the bid is the first bid of the auction of a new id we set the auction end time and emit the event
