@@ -18,7 +18,7 @@ error BID_TOO_LOW();
 error MAX_SUPPLY_REACHED();
 error TOKEN_TRANSFER_FAILURE();
 
-contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
+contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
     IWETH9 public immutable weth; // WETH contract address
     INFT public immutable nft;
     uint256 public immutable auctionDuration; // Duration of auctions in seconds
@@ -160,13 +160,6 @@ contract NFTAuction is Ownable, ReentrancyGuard, JBETHERC20ProjectPayer {
         } else {
             _transferFunds(lastBidder, lastAmount);
         }
-    }
-
-    /**
-    @dev Allows the admin to collect the funds earned on nft mints.
-    */
-    function collectFunds() external onlyOwner {
-        _transferFunds(msg.sender, address(this).balance);
     }
 
     function supportsInterface(bytes4 interfaceId)
