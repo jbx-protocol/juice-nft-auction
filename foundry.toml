@@ -2,10 +2,14 @@
 libs = ['lib']
 out = 'out'
 remappings = [
-    '@jbx-protocol=node_modules/@jbx-protocol/',
-    '@openzeppelin=node_modules/@openzeppelin/',
+    '@jbx-protocol/=node_modules/@jbx-protocol/',
+    '@openzeppelin/=node_modules/@openzeppelin/',
+    '@rari-capital/=node_modules/@rari-capital/',
     'ds-test/=lib/ds-test/src/',
-    '@rari-capital=node_modules/@rari-capital/'
+    'forge-std/=lib/forge-std/src/',
+    'juice-nft-rewards/=lib/juice-nft-rewards/',
+    '@paulrberg/=node_modules/@paulrberg/',
+    'prb-math/=node_modules/prb-math/'
 ]
 src = 'src'
 test = 'forge-test'

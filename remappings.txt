@@ -1,4 +1,8 @@
+@jbx-protocol/=node_modules/@jbx-protocol/
+@openzeppelin/=node_modules/@openzeppelin/
+@paulrberg/=node_modules/@paulrberg/
+@rari-capital/=node_modules/@rari-capital/
 ds-test/=lib/ds-test/src/
-@openzeppelin=node_modules/@openzeppelin/
-@jbx-protocol=node_modules/@jbx-protocol/
-@rari-capital=node_modules/@rari-capital/
+forge-std/=lib/forge-std/src/
+juice-nft-rewards/=lib/juice-nft-rewards/
+prb-math/=node_modules/prb-math/
