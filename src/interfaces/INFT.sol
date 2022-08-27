@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.6;
 
-interface INFT{
+interface INFT {
     /**
     @dev Allows composable minting contracts to check if minting is active.
     @return bool True if minting is active.
@@ -12,5 +12,5 @@ interface INFT{
 
     function mint(address _recipient) external;
 
-    function nextTokenId() external view returns(uint256);
+    function nextTokenId() external view returns (uint256);
 }

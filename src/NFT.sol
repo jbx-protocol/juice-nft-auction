@@ -5,10 +5,11 @@
 
 pragma solidity ^0.8.6; // TODO Upgrade when JB upgrade is onchain
 
-import "@rari-capital/solmate/src/tokens/ERC721.sol";
+// import "@rari-capital/solmate/src/tokens/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@rari-capital/solmate/src/utils/ReentrancyGuard.sol";
+import "juice-nft-rewards/contracts/JBTiered721Delegate.sol";
 
 /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -146,10 +147,7 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
     @dev Updates the minter
     @param newMinter New Minter address
     */
-    function _setMinter(address newMinter)
-        internal
-        onlyOwner
-    {
+    function _setMinter(address newMinter) internal onlyOwner {
         minter = newMinter;
         emit MinterChanged(minter);
     }
