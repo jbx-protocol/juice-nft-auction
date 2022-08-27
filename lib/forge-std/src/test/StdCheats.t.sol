@@ -109,7 +109,9 @@ contract StdCheatsTest is Test {
     }
 
     function testCannotBoundMaxLessThanMin() public {
-        vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
+        vm.expectRevert(
+            bytes("Test bound(uint256,uint256,uint256): Max is less than min.")
+        );
         bound(5, 100, 10);
     }
 
@@ -127,8 +129,14 @@ contract StdCheatsTest is Test {
     }
 
     function testBoundUint256Max() public {
-        assertEq(bound(0, type(uint256).max - 1, type(uint256).max), type(uint256).max - 1);
-        assertEq(bound(1, type(uint256).max - 1, type(uint256).max), type(uint256).max);
+        assertEq(
+            bound(0, type(uint256).max - 1, type(uint256).max),
+            type(uint256).max - 1
+        );
+        assertEq(
+            bound(1, type(uint256).max - 1, type(uint256).max),
+            type(uint256).max
+        );
     }
 
     function testCannotBoundMaxLessThanMin(
@@ -137,12 +145,17 @@ contract StdCheatsTest is Test {
         uint256 max
     ) public {
         vm.assume(min > max);
-        vm.expectRevert(bytes("Test bound(uint256,uint256,uint256): Max is less than min."));
+        vm.expectRevert(
+            bytes("Test bound(uint256,uint256,uint256): Max is less than min.")
+        );
         bound(num, min, max);
     }
 
     function testDeployCode() public {
-        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""));
+        address deployed = deployCode(
+            "StdCheats.t.sol:StdCheatsTest",
+            bytes("")
+        );
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
     }
 
@@ -155,15 +168,19 @@ contract StdCheatsTest is Test {
     constructor() payable {}
 
     function testDeployCodeVal() public {
-        address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", bytes(""), 1 ether);
+        address deployed = deployCode(
+            "StdCheats.t.sol:StdCheatsTest",
+            bytes(""),
+            1 ether
+        );
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
-	assertEq(deployed.balance, 1 ether);
+        assertEq(deployed.balance, 1 ether);
     }
 
     function testDeployCodeValNoArgs() public {
         address deployed = deployCode("StdCheats.t.sol:StdCheatsTest", 1 ether);
         assertEq(string(getCode(deployed)), string(getCode(address(this))));
-	assertEq(deployed.balance, 1 ether);
+        assertEq(deployed.balance, 1 ether);
     }
 
     // We need this so we can call "this.deployCode" rather than "deployCode" directly
@@ -185,7 +202,10 @@ contract StdCheatsTest is Test {
             // by using o_code = new bytes(size)
             o_code := mload(0x40)
             // new "memory end" including padding
-            mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), not(0x1f))))
+            mstore(
+                0x40,
+                add(o_code, and(add(add(size, 0x20), 0x1f), not(0x1f)))
+            )
             // store length in memory
             mstore(o_code, size)
             // actually retrieve the code, this needs assembly
@@ -205,17 +225,22 @@ contract Bar {
     function bar(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
     }
+
     function origin(address expectedSender) public payable {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedSender, "!prank");
     }
-    function origin(address expectedSender, address expectedOrigin) public payable {
+
+    function origin(address expectedSender, address expectedOrigin)
+        public
+        payable
+    {
         require(msg.sender == expectedSender, "!prank");
         require(tx.origin == expectedOrigin, "!prank");
     }
 
     /// `DEAL` STDCHEAT
-    mapping (address => uint256) public balanceOf;
+    mapping(address => uint256) public balanceOf;
     uint256 public totalSupply;
 }
 
