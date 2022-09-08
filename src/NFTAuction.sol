@@ -150,7 +150,7 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
                 JBTokens.ETH, // address _token
                 lastAmount, //uint256 _amount,
                 18, //uint256 _decimals,
-                lastBidder, //address _beneficiary,
+                address(nft), //address _beneficiary,
                 0, //uint256 _minReturnedTokens,
                 false, //bool _preferClaimedTokens,
                 defaultMemo, //string calldata _memo, // TODO: Add your own memo here. Links to image å are displayed on the Juicebox project page as images.
