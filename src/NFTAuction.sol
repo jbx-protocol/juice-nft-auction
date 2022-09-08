@@ -18,6 +18,7 @@ error MAX_SUPPLY_REACHED();
 error TOKEN_TRANSFER_FAILURE();
 
 contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
+    uint256 public constant reservePrice = 0.001 ether;
     IWETH9 public immutable weth; // WETH contract address
     INFT public immutable nft;
     uint256 public immutable auctionDuration; // Duration of auctions in seconds
@@ -98,7 +99,7 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
         if (auctionEndingAt != 0 && block.timestamp >= auctionEndingAt) {
             revert AUCTION_OVER();
         }
-        if (msg.value < (highestBid + 0.001 ether)) {
+        if (msg.value < reservePrice) {
             revert BID_TOO_LOW();
         }
 
