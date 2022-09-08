@@ -9,6 +9,8 @@ import "@rari-capital/solmate/src/tokens/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@rari-capital/solmate/src/utils/ReentrancyGuard.sol";
+import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBDirectory.sol"; 
+import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol"; 
 
 /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -50,6 +52,9 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
+    IJBDirectory public immutable jbDirectory;
+    IJBTokenStore public immutable jbTokenStore;
+    uint256 public immutable projectId; // Juicebox project id that will receive auction proceeds
     uint256 public immutable maxSupply; // Maximum issuance of NFTs. 0 means unlimited.
     uint256 public nextTokenId = 1; // Next token id to be minted id's are 1 based
     string public baseURI;
@@ -70,11 +75,17 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
         string memory _symbol,
         string memory _uri,
         address _minter,
-        uint256 _maxSupply
+        uint256 _maxSupply,
+        uint256 _projectId,
+        IJBDirectory _jbDirectory,
+        IJBTokenStore _jbTokenStore
     ) ERC721(_name, _symbol) {
         _setBaseURI(_uri);
         _setMinter(_minter);
         maxSupply = _maxSupply;
+        projectId = _projectId;
+        jbDirectory = _jbDirectory;
+        jbTokenStore = _jbTokenStore;
     }
 
     /*//////////////////////////////////////////////////////////////
