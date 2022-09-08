@@ -9,8 +9,10 @@ import "@rari-capital/solmate/src/tokens/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@rari-capital/solmate/src/utils/ReentrancyGuard.sol";
-import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBDirectory.sol"; 
-import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol"; 
+import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBDirectory.sol";
+import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol";
+import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBToken.sol";
+import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBPaymentTerminal.sol";
 
 /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -57,6 +59,7 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
     uint256 public immutable projectId; // Juicebox project id that will receive auction proceeds
     uint256 public immutable maxSupply; // Maximum issuance of NFTs. 0 means unlimited.
     uint256 public nextTokenId = 1; // Next token id to be minted id's are 1 based
+    uint256 public totalSupply; // need this for the redemption accounting
     string public baseURI;
     bool public metadataFrozen;
     address public minter;
@@ -157,10 +160,7 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
     @dev Updates the minter
     @param newMinter New Minter address
     */
-    function _setMinter(address newMinter)
-        internal
-        onlyOwner
-    {
+    function _setMinter(address newMinter) internal onlyOwner {
         minter = newMinter;
         emit MinterChanged(minter);
     }
@@ -182,7 +182,22 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
 
         unchecked {
             ++nextTokenId;
+            ++totalSupply;
         }
+    }
+
+    function redeemTokens(uint256 _id) external {
+        address holder = ownerOf(_id);
+        IJBToken token = jbTokenStore.tokenOf(projectId);
+        IJBPaymentTerminal _terminal = jbDirectory.primaryTerminalOf(projectId, address(token));
+        uint256 projectTokenBalance = token.balanceOf(address(this), projectId);
+        uint256 amountToRedeem = projectTokenBalance / totalSupply;
+        // TODO call redeem
+        unchecked {
+            --totalSupply;
+        }
+        _burn(_id);
+        // TODO transfer the reclaim amount to the holder
     }
 
     /*//////////////////////////////////////////////////////////////
