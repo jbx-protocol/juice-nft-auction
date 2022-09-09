@@ -173,6 +173,10 @@ contract NFT is ERC721, Ownable, ReentrancyGuard, JBOperatable {
         _setMinter(newMinter);
     }
 
+   /**
+    @dev Mints the nft.
+    @param _recipient address to mint to
+    */
     function mint(address _recipient)
         external
         onlyMinter
@@ -191,7 +195,12 @@ contract NFT is ERC721, Ownable, ReentrancyGuard, JBOperatable {
         }
     }
 
-    function redeemTokens(JBRedeemData calldata _redeemData)
+   /**
+    @dev Redeems the nft for the terminal tokens eth/erc20.
+    @param _redeemData redeem data
+    @dev The amount to redeem depends on total supply and it is only updated in this & mint method any nft's burnt outside of this contract are out of scope and have no affect on the redemption amount.
+    */
+    function redeemToken(JBRedeemData calldata _redeemData)
         external
         nonReentrant
         requirePermission(
