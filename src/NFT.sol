@@ -9,18 +9,16 @@ import "@rari-capital/solmate/src/tokens/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@rari-capital/solmate/src/utils/ReentrancyGuard.sol";
-import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBDirectory.sol";
 import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBTokenStore.sol";
-import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBToken.sol";
-import "@jbx-protocol/contracts-v2/contracts/interfaces/IJBPaymentTerminal.sol";
-
+import "@jbx-protocol/contracts-v2/contracts/abstract/JBOperatable.sol";
+import "./structs/JBRedeemData.sol";
 /*//////////////////////////////////////////////////////////////
                                 ERRORS
 //////////////////////////////////////////////////////////////*/
 error METADATA_IS_IMMUTABLE();
 error MAX_SUPPLY_REACHED();
 
-contract NFT is ERC721, Ownable, ReentrancyGuard {
+contract NFT is ERC721, Ownable, ReentrancyGuard, JBOperatable {
     using Strings for uint256;
 
     /*//////////////////////////////////////////////////////////////
@@ -54,7 +52,7 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
     /*//////////////////////////////////////////////////////////////
                               CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
-    IJBDirectory public immutable jbDirectory;
+    uint256 public constant REDEEM_PERMISSION_INDEX = 2;
     IJBTokenStore public immutable jbTokenStore;
     uint256 public immutable projectId; // Juicebox project id that will receive auction proceeds
     uint256 public immutable maxSupply; // Maximum issuance of NFTs. 0 means unlimited.
@@ -72,6 +70,9 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
      * @param _uri Base URI of the NFT, concatenated with Token ID to create tokenURI
      * @param _minter Address of the minter
      * @param _maxSupply Maximum supply of NFTs. 0 means unlimited
+     * @param _projectId project ID associated with the nft for redemption
+     * @param _jbTokenStore jbtoken store instance
+     * @param _operatorStore operator store instance for checking operator permission
      */
     constructor(
         string memory _name,
@@ -80,14 +81,13 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
         address _minter,
         uint256 _maxSupply,
         uint256 _projectId,
-        IJBDirectory _jbDirectory,
-        IJBTokenStore _jbTokenStore
-    ) ERC721(_name, _symbol) {
+        IJBTokenStore _jbTokenStore,
+        IJBOperatorStore _operatorStore
+    ) JBOperatable(_operatorStore) ERC721(_name, _symbol) {
         _setBaseURI(_uri);
         _setMinter(_minter);
         maxSupply = _maxSupply;
         projectId = _projectId;
-        jbDirectory = _jbDirectory;
         jbTokenStore = _jbTokenStore;
     }
 
@@ -173,7 +173,12 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
         _setMinter(newMinter);
     }
 
-    function mint(address _recipient) external onlyMinter whenMintingIsActive {
+    function mint(address _recipient)
+        external
+        onlyMinter
+        whenMintingIsActive
+        nonReentrant
+    {
         if (isMaxSupplyReached()) {
             revert MAX_SUPPLY_REACHED();
         }
@@ -186,18 +191,34 @@ contract NFT is ERC721, Ownable, ReentrancyGuard {
         }
     }
 
-    function redeemTokens(uint256 _id) external {
-        address holder = ownerOf(_id);
+    function redeemTokens(JBRedeemData calldata _redeemData)
+        external
+        nonReentrant
+        requirePermission(
+            ownerOf(_redeemData.tokenId),
+            projectId,
+            REDEEM_PERMISSION_INDEX
+        )
+    {
         IJBToken token = jbTokenStore.tokenOf(projectId);
-        IJBPaymentTerminal _terminal = jbDirectory.primaryTerminalOf(projectId, address(token));
-        uint256 projectTokenBalance = token.balanceOf(address(this), projectId);
-        uint256 amountToRedeem = projectTokenBalance / totalSupply;
-        // TODO call redeem
+        uint256 amountToRedeem = token.balanceOf(address(this), projectId) /
+            totalSupply;
+
+        _redeemData.terminal.redeemTokensOf(
+            address(this),
+            projectId,
+            amountToRedeem,
+            _redeemData.token,
+            _redeemData.minReturnedTokens,
+            _redeemData.beneficiary,
+            _redeemData.memo,
+            _redeemData.metadata
+        );
+
         unchecked {
             --totalSupply;
         }
-        _burn(_id);
-        // TODO transfer the reclaim amount to the holder
+        _burn(_redeemData.tokenId);
     }
 
     /*//////////////////////////////////////////////////////////////
