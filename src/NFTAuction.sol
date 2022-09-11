@@ -18,6 +18,7 @@ error MAX_SUPPLY_REACHED();
 error TOKEN_TRANSFER_FAILURE();
 
 contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
+    uint256 public constant reservePrice = 0.001 ether;
     IWETH9 public immutable weth; // WETH contract address
     INFT public immutable nft;
     uint256 public immutable auctionDuration; // Duration of auctions in seconds
@@ -98,7 +99,7 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
         if (auctionEndingAt != 0 && block.timestamp >= auctionEndingAt) {
             revert AUCTION_OVER();
         }
-        if (msg.value < (highestBid + 0.001 ether)) {
+        if (msg.value < reservePrice) {
             revert BID_TOO_LOW();
         }
 
@@ -107,7 +108,8 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
 
         highestBid = msg.value;
         highestBidder = msg.sender;
-         
+
+        // don't need to enter in the transfer block in case it is sthe first bif 
         if (auctionEndingAt != 0)
           _transferFunds(lastBidder, lastAmount);
 
@@ -149,7 +151,7 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
                 JBTokens.ETH, // address _token
                 lastAmount, //uint256 _amount,
                 18, //uint256 _decimals,
-                lastBidder, //address _beneficiary,
+                address(nft), //address _beneficiary,
                 0, //uint256 _minReturnedTokens,
                 false, //bool _preferClaimedTokens,
                 defaultMemo, //string calldata _memo, // TODO: Add your own memo here. Links to image å are displayed on the Juicebox project page as images.
