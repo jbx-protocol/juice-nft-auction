@@ -108,7 +108,8 @@ contract NFTAuction is ReentrancyGuard, JBETHERC20ProjectPayer {
 
         highestBid = msg.value;
         highestBidder = msg.sender;
-         
+
+        // don't need to enter in the transfer block in case it is sthe first bif 
         if (auctionEndingAt != 0)
           _transferFunds(lastBidder, lastAmount);
 

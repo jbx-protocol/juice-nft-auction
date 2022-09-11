@@ -183,10 +183,7 @@ contract NFT is ERC721, Ownable, ReentrancyGuard, JBOperatable {
         whenMintingIsActive
         nonReentrant
     {
-        if (isMaxSupplyReached()) {
-            revert MAX_SUPPLY_REACHED();
-        }
-
+        // max supply check already in the auction contract who is the minter so we don't need it here
         _mint(_recipient, nextTokenId);
 
         unchecked {
